@@ -1,11 +1,66 @@
-import { DiscordLogo, Lightning } from "phosphor-react";
+import { DefaultUi, Player, Youtube } from "@vime/react";
+import { gql, useQuery } from "@apollo/client";
+import { CaretRight, DiscordLogo, FileArrowDown, Image, Lightning } from "phosphor-react";
 
-export function Video() {
+import '@vime/core/themes/default.css'
+import { printIntrospectionSchema } from "graphql";
+
+const GET_lESSON_BY_SLUG_QUERY = gql`
+    query GetLessonBySlug ($slug: String) {
+    lesson(where: {slug: $slug}) {
+        title
+        videoId
+        description
+        teacher {
+            name
+            bio
+            avatarURL
+        }
+    }
+}
+`
+
+interface GetLessonBySlugResponse {
+    lesson: {
+        title: string;
+        videoId: string;
+        description: string;
+        teacher: {
+            name: string;
+            avatarURL: string;
+            bio: string;
+        }
+    }
+}
+
+interface VideoProps {
+    lessonSlug: string;
+}
+
+export function Video({ lessonSlug }: VideoProps) {
+
+    const { data } = useQuery<GetLessonBySlugResponse>(GET_lESSON_BY_SLUG_QUERY, {
+        variables: {
+            slug: lessonSlug
+        }
+    })
+
+    if (!data) {
+        return (
+            <div className="flex-1">
+                <h1 className="flex items-center justify-center">Carregando...</h1>
+            </div>
+        )
+    }
+
     return (
         <div className="flex-1">
             <div className="bg-black flex justify-center">
                 <div className="h-full w-full max-w-[1100px] max-h-[60vh] aspect-video">
-
+                    <Player>
+                        <Youtube videoId={data.lesson.videoId} />
+                        <DefaultUi />
+                    </Player>
                 </div>
             </div>
 
@@ -13,28 +68,22 @@ export function Video() {
                 <div className="flex items-start gap-16">
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold">
-                            Aula 01 - abertura
+                            {data.lesson.title}
                         </h1>
                         <p className="mt-4 text-gray-200 leading-relaxed">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                            Mollitia maiores doloribus nihil dolor eius at praesentium doloremque, expedita cum veritatis!
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                            Rem sequi molestias delectus fuga minima accusantium assumenda officiis. Minima harum debitis nulla.
-                            Dolore praesentium qui natus in illum. Numquam quas illo inventore
-                            magnam dolore nemo aliquam voluptas, iure, nam excepturi maiores alias libero obcaecati
-                            quibusdam placeat debitis veniam animi nulla? Fugiat?
+                            {data.lesson.description}
                         </p>
 
                         <div className="flex items-center gap-4 mt-6">
                             <img
                                 className="h-16 w-16 rounded-full border-2 border-blue-500"
-                                src="https://avatars.githubusercontent.com/u/63966608?v=4"
+                                src={data.lesson.teacher.avatarURL}
                                 alt="foto professor"
                             />
 
                             <div className="leading-relaxed">
-                                <strong className="font-bold text-2xl block">Natan Falconi</strong>
-                                <span className="text-gray-200 text-sm block">Estudante de Programação</span>
+                                <strong className="font-bold text-2xl block">{data.lesson.teacher.name}</strong>
+                                <span className="text-gray-200 text-sm block">{data.lesson.teacher.bio}</span>
                             </div>
                         </div>
                     </div>
@@ -51,8 +100,47 @@ export function Video() {
                     </div>
                 </div>
 
-                <div>
+                <div className="gap-8 mt-20 grid grid-cols-2">
 
+                    <a
+                        className="bg-gray-700 rounded-none overflow-hidden flex items-stretch gap-6 hover:bg-gray-600 transition-colors"
+                        href="#"
+                    >
+                        <div className="bg-green-700 h-full p-6 flex items-center">
+                            <FileArrowDown size={40} />
+                        </div>
+                        <div className="py-6 leading-relaxed">
+                            <strong className="text-2xl">
+                                Material Complementar
+                            </strong>
+                            <p className="text-sm text-gray-200 mt-2">
+                                Acesse o material complementar para acelerar o seu desenvolvimento
+                            </p>
+                        </div>
+                        <div className="h-full p-6 flex items-center">
+                            <CaretRight size={24} />
+                        </div>
+                    </a>
+
+                    <a
+                        className="bg-gray-700 rounded-none overflow-hidden flex items-stretch gap-6 hover:bg-gray-600 transition-colors"
+                        href="#"
+                    >
+                        <div className="bg-green-700 h-full p-6 flex items-center">
+                            <Image size={40} />
+                        </div>
+                        <div className="py-6 leading-relaxed">
+                            <strong className="text-2xl">
+                                Wallpapers esclusivos
+                            </strong>
+                            <p className="text-sm text-gray-200 mt-2">
+                                Baixe wallpapers exclusivos do Ignite Lab e personalize a sua máquina
+                            </p>
+                        </div>
+                        <div className="h-full p-6 flex items-center">
+                            <CaretRight size={24} />
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
