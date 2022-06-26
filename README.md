@@ -1,1 +1,1 @@
-# ignite-lab #Event-Plataform
+# ignite-lab | Event-Plataform
